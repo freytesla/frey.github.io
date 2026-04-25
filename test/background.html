@@ -1,0 +1,221 @@
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #F9F8F2; overflow: hidden; }
+  #c { display: block; width: 100vw; height: 100vh; }
+  .wrap { position: relative; width: 100%; height: 100vh; background: #F9F8F2; overflow: hidden; border-radius: 0; }
+</style>
+<div class="wrap">
+  <canvas id="c"></canvas>
+</div>
+<script>
+(function(){
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  const wrap = canvas.parentElement;
+  const ACCENT = { r: 234, g: 231, b: 225 };
+  let W, H, pts, tris, mouse = { x: -9999, y: -9999 };
+
+  function resize() {
+    W = canvas.width = wrap.clientWidth;
+    H = canvas.height = wrap.clientHeight;
+    init();
+  }
+
+  function dist2(a, b) {
+    const dx = a.x - b.x; dy = a.y - b.y;
+    return dx*dx + dy*dy;
+  }
+
+  function superTriangle() {
+    const M = Math.max(W, H) * 3;
+    return [
+      { x: -M, y: -M },
+      { x: W/2, y: M },
+      { x: W + M, y: -M }
+    ];
+  }
+
+  function circumcircle(a, b, c) {
+    const ax = a.x, ay = a.y, bx = b.x, by = b.y, cx = c.x, cy = c.y;
+    const D = 2*(ax*(by - cy) + bx*(cy - ay) + cx*(ay - by));
+    if (Math.abs(D) < 1e-10) return null;
+    const ux = ((ax*ax + ay*ay)*(by - cy) + (bx*bx + by*by)*(cy - ay) + (cx*cx + cy*cy)*(ay - by)) / D;
+    const uy = ((ax*ax + ay*ay)*(cx - bx) + (bx*bx + by*by)*(ax - cx) + (cx*cx + cy*cy)*(bx - ax)) / D;
+    const r2 = (ax-ux)*(ax-ux) + (ay-uy)*(ay-uy);
+    return { x: ux, y: uy, r2 };
+  }
+
+  function delaunay(points) {
+    const st = superTriangle();
+    const allPts = [...points, ...st];
+    let triangles = [{ i: points.length, j: points.length+1, k: points.length+2 }];
+
+    for (let pi = 0; pi < points.length; pi++) {
+      const p = allPts[pi];
+      let edges = [];
+      let good = [];
+
+      for (const t of triangles) {
+        const cc = circumcircle(allPts[t.i], allPts[t.j], allPts[t.k]);
+        if (!cc) { good.push(t); continue; }
+        const dx = p.x - cc.x, dy = p.y - cc.y;
+        if (dx*dx + dy*dy < cc.r2 - 1e-6) {
+          edges.push([t.i, t.j], [t.j, t.k], [t.k, t.i]);
+        } else {
+          good.push(t);
+        }
+      }
+
+      const unique = [];
+      for (let e = 0; e < edges.length; e++) {
+        let dup = false;
+        for (let f = 0; f < edges.length; f++) {
+          if (e !== f && edges[e][0] === edges[f][1] && edges[e][1] === edges[f][0]) { dup = true; break; }
+        }
+        if (!dup) unique.push(edges[e]);
+      }
+
+      for (const [a, b] of unique) {
+        good.push({ i: pi, j: a, k: b });
+      }
+      triangles = good;
+    }
+
+    const stIdx = new Set([points.length, points.length+1, points.length+2]);
+    return triangles.filter(t => !stIdx.has(t.i) && !stIdx.has(t.j) && !stIdx.has(t.k));
+  }
+
+  function init() {
+    // 大三角形网格
+    const cols = Math.floor(W / 120) + 2;
+    const rows = Math.floor(H / 120) + 2;
+    pts = [];
+
+    for (let r = -1; r <= rows; r++) {
+      for (let c = -1; c <= cols; c++) {
+        const jitterX = (Math.random() - 0.5) * 40;
+        const jitterY = (Math.random() - 0.5) * 40;
+        pts.push({
+          x: c * (W / (cols-2)) + jitterX,
+          y: r * (H / (rows-2)) + jitterY,
+          ox: c * (W / (cols-2)) + jitterX,
+          oy: r * (H / (rows-2)) + jitterY,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.4 + Math.random() * 0.6, // 运动速度提升
+          amp: 22 + Math.random() * 18,      // 🔹 运动幅度大幅增强
+          t: Math.random() * 1000
+        });
+      }
+    }
+
+    tris = delaunay(pts);
+  }
+
+  function update() {
+    const now = Date.now() * 0.001;
+    for (const p of pts) {
+      p.t += 0.012 * p.speed; // 🔹 运动速度加快
+      // 🔹 动态位移更明显，波形更灵动
+      p.x = p.ox + Math.sin(p.t + p.phase) * p.amp;
+      p.y = p.oy + Math.cos(p.t * 0.85 + p.phase) * p.amp * 0.9;
+
+      // 鼠标交互推力增强
+      const mdx = p.x - mouse.x;
+      const mdy = p.y - mouse.y;
+      const md2 = mdx*mdx + mdy*mdy;
+      const R = 130;
+      if (md2 < R*R && md2 > 0.01) {
+        const md = Math.sqrt(md2);
+        const strength = (1 - md / R) * 38; // 鼠标影响更强
+        p.x += (mdx / md) * strength;
+        p.y += (mdy / md) * strength;
+      }
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#F9F8F2';
+    ctx.fillRect(0, 0, W, H);
+
+    for (const t of tris) {
+      const a = pts[t.i], b = pts[t.j], c = pts[t.k];
+      if (!a || !b || !c) continue;
+
+      const cx2 = (a.x + b.x + c.x) / 3;
+      const cy2 = (a.y + b.y + c.y) / 3;
+      const mdx = cx2 - mouse.x;
+      const mdy = cy2 - mouse.y;
+      const md2 = mdx*mdx + mdy*mdy;
+      const R = 140;
+      const proximity = md2 < R*R ? (1 - Math.sqrt(md2) / R) : 0;
+
+      const baseAlpha = 0.55;
+      const accentAlpha = baseAlpha + proximity * 0.15;
+      const r = ACCENT.r;
+      const g = ACCENT.g;
+      const b2 = ACCENT.b;
+
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.lineTo(c.x, c.y);
+      ctx.closePath();
+
+      ctx.fillStyle = `rgba(${r},${g},${b2},${0.04 + proximity * 0.04})`;
+      ctx.fill();
+
+      // 超细线条
+      ctx.strokeStyle = `rgba(${r},${g},${b2},${accentAlpha})`;
+      ctx.lineWidth = 1.0 + proximity * 0.2;
+      ctx.stroke();
+    }
+
+    for (const p of pts) {
+      const mdx = p.x - mouse.x;
+      const mdy = p.y - mouse.y;
+      const md2 = mdx*mdx + mdy*mdy;
+      const R = 90;
+      const prox = md2 < R*R ? (1 - Math.sqrt(md2) / R) : 0;
+      const basePointAlpha = 0.15;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 0.6 + prox * 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${ACCENT.r},${ACCENT.g},${ACCENT.b},${basePointAlpha + prox * 0.4})`;
+      ctx.fill();
+    }
+  }
+
+  let lastRetri = 0;
+  function loop() {
+    update();
+    const now = Date.now();
+    if (now - lastRetri > 2500) {
+      tris = delaunay(pts);
+      lastRetri = now;
+    }
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  wrap.addEventListener('mousemove', e => {
+    const r = canvas.getBoundingClientRect();
+    mouse.x = e.clientX - r.left;
+    mouse.y = e.clientY - r.top;
+  });
+  wrap.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+
+  wrap.addEventListener('touchmove', e => {
+    e.preventDefault();
+    const r = canvas.getBoundingClientRect();
+    mouse.x = e.touches[0].clientX - r.left;
+    mouse.y = e.touches[0].clientY - r.top;
+  }, { passive: false });
+  wrap.addEventListener('touchend', () => { mouse.x = -9999; mouse.y = -9999; });
+
+  window.addEventListener('resize', resize);
+  resize();
+  loop();
+})();
+</script>

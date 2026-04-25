@@ -1,0 +1,43 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+
+}
+
+body{
+    background-color: black;
+    color: rgb(236, 236, 236);
+    font-family:Arial;
+
+    height: 100vh;
+    overflow:hidden;
+    position:relative;
+}
+
+.brand{
+    position: absolute;
+    top:35px;
+    left: 5%;
+    color:#38868d;
+    font-size: 18px;
+
+}
+
+.hero{
+    position:absolute;
+    left:5%;
+    bottom: 5%;
+}
+
+.hero p{
+    font-size:2rem;
+    color:#408d94;
+    margin-bottom:10px;
+}
+
+.hero h1{
+    font-size: 10rem;
+    font-weight: 300;
+    line-height:0.9;
+}
