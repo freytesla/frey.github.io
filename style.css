@@ -234,3 +234,16 @@ body *{
     border:4px solid #38868d;
 }
 
+/* 移动端关闭自定义鼠标 */
+@media (hover: none), (pointer: coarse){
+
+    .frey-cursor{
+        display:none !important;
+    }
+
+    html,
+    body,
+    body *{
+        cursor:auto !important;
+    }
+}

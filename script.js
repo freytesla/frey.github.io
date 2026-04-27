@@ -100,6 +100,11 @@ tick();
 
 /* ================= Frey Cursor ================= */
 
+const isTouchDevice =
+window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
+if(!isTouchDevice){
+
 const cursor = document.querySelector('.frey-cursor');
 
 let mouseX = window.innerWidth + 100;
@@ -188,6 +193,7 @@ window.addEventListener('mousedown', () => {
     }, 180);
 
 });
+}
 
 // 页面加载完成 
 window.addEventListener('DOMContentLoaded', () => {
