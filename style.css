@@ -10,8 +10,8 @@
 }
 
 :root{
-    --fs-sm:clamp(14px,1vw,18px);
-    --fs-lg:clamp(20px,2vw,32px);
+    --fs-sm:clamp(14px,1vw,20px);
+    --fs-lg:clamp(20px,2vw,40px);
     --fs-hero:clamp(64px,10vw,250px);
 
     --fw-light:300;
