@@ -97,3 +97,132 @@ function tick() {
 }
 
 tick();
+
+/* ================= Frey Cursor ================= */
+
+const cursor = document.querySelector('.frey-cursor');
+
+let mouseX = window.innerWidth + 100;
+let mouseY = window.innerHeight + 100;
+
+let x = mouseX;
+let y = mouseY;
+
+window.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+});
+
+let cursorEase = 0.22;
+
+function animateCursor(){
+
+    x += (mouseX - x) * cursorEase;
+    y += (mouseY - y) * cursorEase;
+
+cursor.style.transform =
+    `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+
+    requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+/* hover 交互元素时变化 */
+const hoverTargets = document.querySelectorAll(
+    'a, button, .ball'
+);
+
+hoverTargets.forEach(el => {
+    el.addEventListener('mouseenter', () => {
+        cursor.classList.add('is-hover');
+    });
+
+    el.addEventListener('mouseleave', () => {
+        cursor.classList.remove('is-hover');
+    });
+});
+
+/* ================= Click Effect Minimal ================= */
+
+window.addEventListener('mousedown', () => {
+
+    /* 点击瞬间吸附到真实鼠标 */
+    x = mouseX;
+    y = mouseY;
+
+    cursor.style.transform =
+    `translate(${x}px, ${y}px) translate(-50%,-50%)`;
+
+    /* 暂时更跟手 */
+    cursorEase = 0.42;
+
+    /* 点击反馈 */
+    cursor.animate(
+        [
+            {
+                transform:
+                `translate(${x}px, ${y}px) translate(-50%,-50%) scale(1)`
+            },
+            {
+                transform:
+                `translate(${x}px, ${y}px) translate(-50%,-50%) scale(0.72)`
+            },
+            {
+                transform:
+                `translate(${x}px, ${y}px) translate(-50%,-50%) scale(1.08)`
+            },
+            {
+                transform:
+                `translate(${x}px, ${y}px) translate(-50%,-50%) scale(1)`
+            }
+        ],
+        {
+            duration:240,
+            easing:'cubic-bezier(.22,.61,.36,1)'
+        }
+    );
+
+    /* 恢复阻尼 */
+    setTimeout(() => {
+        cursorEase = 0.22;
+    }, 180);
+
+});
+
+// 页面加载完成 
+window.addEventListener('DOMContentLoaded', () => {
+
+  // 第一个LOGO
+console.log(
+    "%c\n" +
+    " ███████████  ███████████    ██████████  █████ █████\n" +
+    "▒▒███▒▒▒▒▒▒█  ▒███▒▒▒▒▒███  ▒▒███▒▒▒▒▒█  ▒███ ▒▒███ \n" +
+    " ▒███   █ ▒   ▒███    ▒███   ▒███  █ ▒   ▒▒███ ███  \n" +
+    " ▒███████     ▒██████████    ▒██████      ▒▒█████   \n" +
+    " ▒███▒▒▒█     ▒███▒▒▒▒███    ▒███▒▒█       ▒▒███    \n" +
+    " ▒███  ▒      ▒███    ▒███   ▒███ ▒   █     ▒███    \n" +
+    " █████        █████   █████  ██████████     █████   \n" +
+    "▒▒▒▒▒        ▒▒▒▒▒   ▒▒▒▒▒  ▒▒▒▒▒▒▒▒▒▒     ▒▒▒▒▒\n",
+    "font-family: Consolas, 'Courier New', monospace; font-size: 12px; line-height: 1.2; white-space: pre;"
+  );
+
+  // 第二个点阵图
+  console.log(
+    "%c" +
+    "⠀⠀⠀⠀⢀⣠⣤⣤⣤⣀⠀⠀⠀⠀⣀⣠⣤⣤⣤⣄⡀⠀⠀⠀⠀⠀\n" +
+    "⠀⠀⣠⣿⠿⠛⠛⠛⠛⠛⢿⣷⣤⣾⠿⠛⠛⠙⠛⠛⠿⠗⠀⠀⠀⠀\n" +
+    "⠀⣾⡿⠁⠀⠀⠀⠀⠀⠀⠀⠙⡿⠁⠀⠀⠀⢀⣤⣀⠀⠀⢀⣤⣶⡆⠀⠀\n" +
+    "⢸⣿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀\n" +
+    "⠸⣿⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⣿⣿⣿⣿⣿⣿⣧⣄⠀\n" +
+    "⠀⢹⣿⠀⣿⣷⣄⣀⣤⡄⠀⠀⠀⠀⠀⢀⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⠷\n" +
+    "⠀⠀⣁⣤⣿⣿⣿⣿⣿⠃⠀⠀⠀⠀⠀⠘⠛⠛⠛⠻⣿⣿⣿⠋⠉⠀⠀\n" +
+    "⠀⠘⠻⢿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⢀⡀⠹⣿⡟⠀⠀⠀⠀\n" +
+    "⠀⠀⠀⠀⢹⣿⠟⢙⠛⠛⠀⠀⠀⠀⠀⣀⣴⡿⠓⠀⠀⠀⠀⠀⠀⠀\n" +
+    "⠀⠀⠀⠀⠈⠁⠀⠈⠻⢿⣦⣄⠀⣠⣾⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+    "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢿⣿⠿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+    "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+    "font-family: monospace; font-size:12px; line-height:1; white-space:pre; letter-spacing:0;"
+  );
+
+});
+

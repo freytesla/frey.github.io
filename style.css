@@ -4,6 +4,11 @@
     box-sizing:border-box;
 }
 
+/* 禁止文字输入光标闪烁 */
+*{
+    caret-color: transparent;
+}
+
 :root{
     --fs-sm:clamp(14px,1vw,18px);
     --fs-lg:clamp(20px,2vw,32px);
@@ -186,3 +191,46 @@ body{
         0 1px 0 #bebebe,
         0 -1px 0 #bebebe;
 }
+
+/* ================= Frey Cursor ================= */
+
+/* 全站隐藏系统鼠标（含点击时） */
+html,
+body,
+body *{
+    cursor:none !important;
+}
+
+.frey-cursor{
+    position:fixed;
+    top:0;
+    left:0;
+
+    width:12px;
+    height:12px;
+
+    background:#38868d;
+    border-radius:50%;
+
+    pointer-events:none;
+    z-index:9999;
+
+    transform:translate(-50%,-50%);
+    will-change:transform,width,height,background,border;
+
+    transition:
+        width 0.22s ease,
+        height 0.22s ease,
+        background 0.22s ease,
+        border 0.22s ease;
+}
+
+/* hover 可点击元素时 */
+.frey-cursor.is-hover{
+    width:22px;
+    height:22px;
+
+    background:transparent;
+    border:4px solid #38868d;
+}
+

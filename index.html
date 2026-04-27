@@ -36,6 +36,8 @@
         </div>
     </div>
 
+<div class="frey-cursor"></div>
+
     <script src="script.js?v=6"></script>
 
     <!-- GSAP -->
@@ -59,7 +61,7 @@
                     left:-5%;
                     top:54%;
                     width:115%;
-                    height:8px;
+                    height:12px;
                     background:#38868d;
                     transform:scaleX(0);
                     transform-origin:left center;
@@ -115,7 +117,7 @@
 
         // 划线后再停留一会
         .to({},{
-            duration:0.55
+            duration:0.35
         })
 
         // soon + 横线一起消失
@@ -133,5 +135,6 @@
         },'-=0.18');
     </script>
 
+    
 </body>
 </html>
