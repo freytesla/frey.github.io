@@ -234,3 +234,20 @@ body *{
     border:4px solid #38868d;
 }
 
+/* 手机端标题换行对齐修复 */
+@media (max-width: 600px){
+
+    .hero h1{
+        line-height:0.92;
+    }
+
+    .hero h1 .coming,
+    .hero h1 .swap-wrap{
+        display:block !important;
+        margin-left:0 !important;
+    }
+
+    .hero h1 .swap-wrap{
+        margin-top:0.04em;
+    }
+}
